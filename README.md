@@ -148,29 +148,65 @@ cd adaptive-context-memory-crm
 pip install -r requirements.txt
 ```
 
-_Full setup instructions will be added as the implementation progresses._
+**Run the test suite** (33 tests covering every module):
+
+```bash
+python -m pytest tests/ -v
+```
+
+**Run the end-to-end demo** (seeds sample data, runs the full pipeline, prints each stage's output):
+
+```bash
+python examples/demo.py
+```
+
+No API key is required to run the demo — the LLM generation step is simulated so the pipeline logic can be verified independently of any external service.
 
 ## 16. Future Roadmap
 
-- [ ] Core memory store implementation
-- [ ] Semantic indexing layer
-- [ ] Context ranking algorithm (v1: cosine similarity, v2: learned ranking)
-- [ ] Compression module
-- [ ] Prompt assembly templates
-- [ ] Response validation layer
-- [ ] Integration point with the Context Engineering Framework (companion repo)
+**Implemented:**
+- [x] Core memory store (in-memory, interface-first design for future backend swap)
+- [x] Context retrieval with recency + interaction-type filtering
+- [x] Context ranking via TF-IDF cosine similarity
+- [x] Compression module with character-budget enforcement
+- [x] Prompt assembly with separated system/context/query sections
+- [x] Response validator with basic grounding checks
+- [x] Full unit test suite (33 tests) and working end-to-end demo
+
+**Not yet implemented — honest gaps:**
+- [ ] Persistent storage backend (SQLite or Postgres) — currently in-memory only, data does not survive a process restart
+- [ ] True semantic ranking via sentence embeddings — current ranker is TF-IDF (lexical), documented as a known limitation in `ranker.py`
+- [ ] Real LLM integration — the demo simulates the generation step; no live API call is wired in yet
+- [ ] Claim-level grounding verification in the validator — current checks are heuristic pattern matches, not full entailment checking
+- [ ] Integration point with the Context Engineering Framework (companion repo, not yet built)
 
 ## 17. Repository Structure
 
 ```
 adaptive-context-memory-crm/
 ├── README.md
-├── docs/              # Design docs, decision records
-├── screenshots/        # UI captures (once built)
-├── architecture/        # Diagram source files
-├── prompts/           # Prompt templates and versions
-├── examples/           # Example interactions and outputs
-└── src/               # Implementation
+├── requirements.txt
+├── docs/                   # Design docs, decision records
+├── screenshots/            # UI captures (none yet — no UI built)
+├── architecture/           # Diagram source files
+├── prompts/                # Prompt templates and versions
+├── examples/
+│   └── demo.py             # Working end-to-end pipeline demo
+├── src/
+│   ├── __init__.py         # Public API exports
+│   ├── models.py           # MemoryRecord, RankedMemory data models
+│   ├── memory_store.py     # Storage layer
+│   ├── retriever.py        # Candidate filtering (recency, type)
+│   ├── ranker.py           # TF-IDF relevance ranking
+│   ├── compressor.py       # Budget-bounded context compression
+│   ├── prompt_assembler.py # System + context + query assembly
+│   └── validator.py        # Post-generation grounding checks
+└── tests/
+    ├── test_memory_store.py
+    ├── test_retriever.py
+    ├── test_ranker.py
+    ├── test_compressor.py
+    └── test_prompt_and_validator.py
 ```
 
 ---
